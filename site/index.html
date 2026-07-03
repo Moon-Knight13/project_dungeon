@@ -51,6 +51,7 @@
       --accent-ink: #f6efdd;           /* text on oxblood */
       --gold:       #9c7420;           /* illuminated gold (decorative / large only) */
       --focus:      #1c5a6e;           /* accessible focus ring, off-theme on purpose */
+      --placeholder:#493b2a;           /* form placeholder — AA on --bg-soft */
 
       /* ---- Shape & space (8px base unit) -------------------------------- */
       --u: 8px;
@@ -72,6 +73,7 @@
         --accent-ink: #17130c;
         --gold:       #c79a3c;
         --focus:      #6fb7cf;
+        --placeholder:#9d8f74;         /* lighter placeholder for dark inputs */
         --shadow: 0 1px 0 rgba(0,0,0,.3), 0 14px 30px -18px rgba(0,0,0,.8);
       }
     }
@@ -309,7 +311,7 @@
       border: var(--rule) solid var(--border); border-radius: var(--radius);
       padding: calc(var(--u) * 1.25) calc(var(--u) * 1.75);
     }
-    input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }  /* solid: meets AA */
+    input::placeholder, textarea::placeholder { color: var(--placeholder); opacity: 1; }
     input:focus, textarea:focus { border-color: var(--accent); }
     textarea { resize: vertical; }
 
