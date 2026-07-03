@@ -309,7 +309,7 @@
       border: var(--rule) solid var(--border); border-radius: var(--radius);
       padding: calc(var(--u) * 1.25) calc(var(--u) * 1.75);
     }
-    input::placeholder, textarea::placeholder { color: color-mix(in oklab, var(--muted), transparent 25%); }
+    input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }  /* solid: meets AA */
     input:focus, textarea:focus { border-color: var(--accent); }
     textarea { resize: vertical; }
 
