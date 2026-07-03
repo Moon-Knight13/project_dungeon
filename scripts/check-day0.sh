@@ -27,24 +27,10 @@ echo "======================"
 
 # Day-0 checks target repos *derived* from this template; the pristine template
 # itself fails them by design (placeholder CODEOWNERS, no .env, no markers).
-# Detect the template repo and skip early. DAY0_FORCE_FULL=1 overrides.
-is_template_repo() {
-    [[ "${DAY0_FORCE_FULL:-0}" == "1" ]] && return 1
-
-    # Preferred: ask GitHub — authoritative when reachable.
-    local is_template
-    is_template=$(gh repo view --json isTemplate --jq '.isTemplate' 2>/dev/null || echo "")
-    [[ "$is_template" == "true" ]] && return 0
-    [[ "$is_template" == "false" ]] && return 1
-
-    # Offline fallback: require BOTH the placeholder CODEOWNERS and the
-    # template's own origin URL, so derived repos always get the full check.
-    if [[ -f ".github/CODEOWNERS" ]] && grep -q "@your-org/your-team" .github/CODEOWNERS \
-        && git remote get-url origin 2>/dev/null | grep -q "Moon-Knight13/claude_template_repo"; then
-        return 0
-    fi
-    return 1
-}
+# is_template_repo() lives in the shared helper so setup-day0.sh reuses it.
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1090,SC1091
+source "$_SCRIPT_DIR/lib/template-detect.sh"
 
 if is_template_repo; then
     echo "  --  This is the template repo itself — day-0 checks are not applicable."
@@ -54,7 +40,9 @@ if is_template_repo; then
 fi
 
 # 1. CODEOWNERS populated with real owner
-if [[ -f ".github/CODEOWNERS" ]] && ! grep -q "@your-org/your-team" .github/CODEOWNERS; then
+# Ignore comment lines: the placeholder legitimately appears in the file's header
+# comments, so only real owner rules should be scanned for the unreplaced default.
+if [[ -f ".github/CODEOWNERS" ]] && ! grep -v '^[[:space:]]*#' .github/CODEOWNERS | grep -q "@your-org/your-team"; then
     check "CODEOWNERS customized with real owners" "pass" ""
 else
     check "CODEOWNERS customized with real owners" "fail" \
@@ -143,7 +131,7 @@ if [[ "$LOCAL_MODEL_ENABLED" == "true" ]]; then
         check "Ollama reachable at $LOCAL_MODEL_ENDPOINT" "pass" ""
     else
         check "Ollama reachable at $LOCAL_MODEL_ENDPOINT" "fail" \
-            "Install Ollama on your host: https://ollama.com — then run: ollama pull qwen2.5-coder:7b"
+            "Install + pull (https://ollama.com; ollama pull qwen2.5-coder:7b), then bind to 0.0.0.0 so the container can reach it (default 127.0.0.1 is loopback-only). See docs/TEMPLATE_GUIDE.md 'Bind Ollama so the container can reach it' — read the security disclaimer first."
     fi
 else
     echo "  --  Ollama check skipped (LOCAL_MODEL_ENABLED=false)"
