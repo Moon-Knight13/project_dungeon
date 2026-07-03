@@ -17,3 +17,9 @@ README.md
 
 # May be relicensed per project
 LICENSE
+
+# Project web app (Upskill example-page redesign) — owned downstream, never sync
+site/
+netlify.toml
+docs/upskill/
+.github/workflows/web-ci.yml
