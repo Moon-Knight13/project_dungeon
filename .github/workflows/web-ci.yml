@@ -1,0 +1,62 @@
+name: web-ci
+
+# Quality gate for the static site (site/**). Runs the CI half of the assignment's
+# CI/CD: standards validation + accessibility. Deploy (CD) is handled by Netlify's
+# Git integration, not here. Independent of the repo's security workflows.
+
+on:
+  pull_request:
+    paths:
+      - "site/**"
+      - ".github/workflows/web-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/web-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  html-validate:
+    name: HTML validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate site/index.html
+        run: |
+          if [ -f site/index.html ]; then
+            npx --yes html-validate@latest site/index.html
+          else
+            echo "site/index.html not present on this ref — nothing to validate yet."
+          fi
+
+  accessibility:
+    name: Accessibility (pa11y, WCAG2AA)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run pa11y on site/index.html
+        run: |
+          if [ ! -f site/index.html ]; then
+            echo "site/index.html not present on this ref — skipping a11y check."
+            exit 0
+          fi
+          echo '{"chromeLaunchConfig":{"args":["--no-sandbox","--disable-setuid-sandbox"]}}' > pa11y.json
+          npx --yes pa11y@8 \
+            --config pa11y.json \
+            --standard WCAG2AA \
+            --runner htmlcs \
+            --runner axe \
+            site/index.html
