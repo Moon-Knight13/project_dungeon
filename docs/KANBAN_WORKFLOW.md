@@ -8,11 +8,13 @@ no secrets, no Claude-in-CI. Claude acts through your interactive session and
 
 ## The board
 
-Created per repo by `scripts/bootstrap-project.sh`.
+Created per repo by `scripts/bootstrap-project.sh` — run automatically (best-effort)
+by `scripts/setup-day0.sh` on container start once `gh` has the `project` scope; the
+command below is the manual fallback.
 
 | Surface | Values | Meaning |
 |---------|--------|---------|
-| **Status** (columns) | Backlog → Ready → In Progress → In Review → Done | The at-a-glance overview and delivery stage |
+| **Status** (columns) | Backlog → Todo → Ready → In Progress → In Review → Done | The at-a-glance overview and delivery stage |
 | **BMAD Stage** (field) | Discovery … Security & Release | Which planning stage a card came from (mostly on epics) |
 | **Route** (field) | Human · Claude · Local | Who should work the card — derived from `scripts/route-model.sh` |
 | `agent-ready` (label) | — | Card is triaged and may be claimed by an agent session |
@@ -28,8 +30,12 @@ with how work is actually routed:
 
 ## One-time setup (day 0)
 
+`scripts/setup-day0.sh` runs this automatically once `gh` is authenticated with the
+`project` scope (re-run it after auth, or it fires on the next container start). To do
+it by hand — or to grant the scope, which is interactive:
+
 ```bash
-gh auth refresh -s project              # grant Projects scope to your CLI
+gh auth refresh -s project              # grant Projects scope to your CLI (interactive)
 APPLY=true bash scripts/bootstrap-project.sh   # create board, fields, labels
 ```
 

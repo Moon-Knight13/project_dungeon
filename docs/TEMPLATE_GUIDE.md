@@ -57,6 +57,44 @@ curl http://localhost:11434/api/tags
 
 This template maps container access to host via host.docker.internal and firewall rules allow only host gateway tcp/11434.
 
+#### Bind Ollama so the container can reach it
+
+By default Ollama listens on `127.0.0.1:11434` (loopback only). The dev container
+reaches the host over a separate gateway address, so a loopback-only Ollama is
+**not reachable from the container** — `curl http://host.docker.internal:11434`
+fails with connection refused. You must bind Ollama to `0.0.0.0` on the host.
+
+Pick the method matching how Ollama runs on your host:
+
+- **systemd** (most Linux installs):
+  ```bash
+  sudo mkdir -p /etc/systemd/system/ollama.service.d
+  sudo tee /etc/systemd/system/ollama.service.d/override.conf >/dev/null <<'EOF'
+  [Service]
+  Environment="OLLAMA_HOST=0.0.0.0:11434"
+  EOF
+  sudo systemctl daemon-reload
+  sudo systemctl restart ollama
+  ```
+- **manual foreground:** `OLLAMA_HOST=0.0.0.0:11434 ollama serve`
+- **docker:** `-p 0.0.0.0:11434:11434` and `-e OLLAMA_HOST=0.0.0.0`
+- **snap:** `sudo snap set ollama host=0.0.0.0:11434`
+
+Confirm the bind before opening the devcontainer:
+
+```bash
+ss -tlnp | grep 11434   # expect 0.0.0.0:11434 (or *:11434), not 127.0.0.1:11434
+```
+
+> **⚠️ Security disclaimer — you accept this risk.**
+> Binding `0.0.0.0` exposes Ollama on **every** host interface, including your
+> LAN/Wi-Fi IP. **Ollama has no authentication** — anyone who can route to your
+> host on tcp/11434 can run models and consume your GPU/CPU. This is safe only on
+> a **trusted network you control**. On public, office, or shared Wi-Fi, do not
+> use `0.0.0.0`; instead bind the container gateway address only, or firewall
+> tcp/11434 to the container subnet. If you do not accept this exposure, set
+> `LOCAL_MODEL_ENABLED=false` in `.env` and routing falls back to Claude.
+
 ### Claude Credential Prerequisite
 
 Claude auth is stored in a mounted user config volume and persists across container restarts.
@@ -106,35 +144,59 @@ This template verifies the pinned Caveman installer script checksum before execu
    - BMAD workflow install
    - pre-commit hooks install
    - Claude Code official plugins install (skill-creator, frontend-design, code-review, superpowers, commit-commands)
+   - day-0 auto-setup (`scripts/setup-day0.sh`): copies `.env` + `.claude/settings.json`, fills CODEOWNERS from the git remote, and (once gh is authenticated) applies the GitHub + Kanban bootstraps
 
 Note: startup is intentionally deterministic; pre-commit hook versions are not auto-updated unless `PRECOMMIT_AUTOUPDATE=1` is set.
 
-5. Complete the manual day-0 steps below — then verify:
+5. Authenticate — the only manual steps (interactive, cannot be automated):
+   - `claude login`
+   - `gh auth login --hostname github.com --git-protocol https --web`, then `gh auth setup-git`, then `gh auth refresh -s project`
+6. Re-run the auto-setup so the now-unblocked GitHub + Kanban bootstraps apply, then verify:
 
 ```bash
-bash scripts/check-day0.sh
+bash scripts/setup-day0.sh   # applies the auth-gated bootstraps, then prints status
+bash scripts/check-day0.sh   # verify — expect all green
 ```
 
-6. Push initial commit so CI checks exist.
+7. Push initial commit so CI checks exist.
 
 ## Day 0 Setup
 
-After the devcontainer starts, these steps require human input and cannot be automated:
+Most of day-0 now runs **automatically** on container start via
+`scripts/setup-day0.sh` (the last step of `postStartCommand`). The only steps that
+still need a human are the interactive auth flows.
+
+### Automatic on build (no action needed)
+
+| Step | Handled by |
+|------|-----------|
+| Copy env config (`cp .env.example .env`) | `setup-day0.sh` (skips if `.env` already exists) |
+| Copy Claude MCP config (`.claude/settings.json`) | `setup-day0.sh` (skips if it already exists) |
+| Populate CODEOWNERS | `setup-day0.sh` derives the owner from the git remote (warns if it looks like an org — orgs need `@org/team`, not a bare `@org`) |
+| Apply GitHub branch-protection ruleset | `setup-day0.sh`, best-effort **once gh is authenticated** (passes `ADMIN_BYPASS=true` so admins keep a break-glass bypass) |
+| Create the Kanban board | `setup-day0.sh`, best-effort **once gh has the `project` scope** |
+
+The two GitHub bootstraps need auth (below), so they apply on the **re-run** of
+`setup-day0.sh` after you authenticate — or on the next container start.
+
+### Manual (interactive auth — the only human steps)
 
 | Step | Command | Why it's manual |
 |------|---------|-----------------|
-| Populate CODEOWNERS | Edit `.github/CODEOWNERS` | Requires your real GitHub username or team |
-| Apply GitHub branch protection | `APPLY=true bash scripts/bootstrap-github-settings.sh` | Requires `gh auth login` with repo admin scope |
-| Copy env config | `cp .env.example .env` | Per-developer preferences and optional secrets |
-| Copy Claude MCP config | `cp .claude/settings.json.example .claude/settings.json` | Endpoint and model may differ per machine |
+| Authenticate Claude | `claude login` | Interactive browser/device login |
 | Authenticate gh (browser OAuth) | `gh auth login --hostname github.com --git-protocol https --web`, then `gh auth setup-git` | Interactive browser login; the OAuth token stays in gh's config volume — never in env vars or repo files |
 | Grant Projects scope | `gh auth refresh -s project` | Required to create/manage the Kanban board (Projects v2) |
-| Create the Kanban board | `APPLY=true bash scripts/bootstrap-project.sh` | Creates the per-repo Project board, fields, and labels |
+| Finish the bootstraps | `bash scripts/setup-day0.sh` | Re-run after auth so the GitHub ruleset + board bootstraps apply |
 | Allow Actions to open PRs | Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests" | Required for template-sync (and other PR-creating automation); repo settings need admin UI/API |
 | Add `TEMPLATE_SYNC_TOKEN` secret (optional) | Fine-grained PAT: contents + pull requests + workflows write | Only needed when a template-sync PR changes `.github/workflows/` files; falls back to `GITHUB_TOKEN` otherwise |
 | Install Ollama (optional) | See [Ollama docs](https://ollama.com) | Only needed if you want local model routing |
 
-Run `bash scripts/check-day0.sh` at any time to see which steps are still pending.
+The manual bootstrap commands remain available as a fallback:
+`APPLY=true bash scripts/bootstrap-github-settings.sh` and
+`APPLY=true bash scripts/bootstrap-project.sh`.
+
+Run `bash scripts/check-day0.sh` at any time to see which steps are still pending;
+`setup-day0.sh` prints the same status plus the exact next commands at the end of every run.
 
 `bootstrap-github-settings.sh` configures a repository **ruleset**
 (`Main_Branch_Protections`, targeting the default branch), not legacy branch
@@ -148,8 +210,9 @@ Bootstrap safety defaults:
 - only the default branch is targeted unless `REQUIRE_DEFAULT_BRANCH=false`
 - refuses to require code-owner reviews while `.github/CODEOWNERS` is unset or still
   the shipped placeholder owner (override with `REQUIRE_CODEOWNERS=false`)
-- repo admins may bypass by default; set `ADMIN_BYPASS=false` for a multi-maintainer
-  repo that wants no bypass
+- no admin bypass by default (admins are held to the same gates); the automated
+  `setup-day0.sh` run passes `ADMIN_BYPASS=true` for a solo-repo break-glass, and
+  manual callers can opt in the same way
 - pre-change snapshots are saved under `.ai/bootstrap-snapshots` for rollback
 
 ## Security Model
@@ -240,7 +303,7 @@ a team without agents stepping on each other. It is entirely `gh`-CLI driven:
 **no API keys, no secrets, no Claude-in-CI**. Claude acts through your
 interactive session and `gh`.
 
-- Columns: `Backlog → Ready → In Progress → In Review → Done`.
+- Columns: `Backlog → Todo → Ready → In Progress → In Review → Done`.
 - Fields: **BMAD Stage** and **Route** (Human / Claude / Local, derived from
   `scripts/route-model.sh` via `scripts/suggest-route.sh`).
 - Coordination: a collision-safe **claim protocol** (`scripts/board.sh claim` —
@@ -341,8 +404,14 @@ Propagates from template files:
   creation by the template-sync workflow (see
   [Template Updates](#template-updates-downstream-sync))
 
+Automatic per new repository (on container start, via `scripts/setup-day0.sh`):
+- copy `.env` + `.claude/settings.json` from the shipped examples
+- populate CODEOWNERS from the git remote owner
+- apply the branch-protection ruleset and create the Kanban board — best-effort,
+  once `gh` is authenticated (re-run `setup-day0.sh` after auth to trigger them)
+
 Manual per new repository:
-- run bootstrap script for branch protections and required checks
+- authenticate Claude and `gh` (interactive OAuth — the only unavoidable human step)
 - enable or verify repository-level security settings in GitHub if org rulesets are not centrally managed
 
 ## Compatibility Matrix
