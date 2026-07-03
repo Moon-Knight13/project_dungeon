@@ -45,7 +45,7 @@
       --bg-soft:    #e3d5b4;           /* deeper parchment (cards, wells) */
       --bg-sunk:    #d9c9a3;           /* inset (prompt box) */
       --ink:        #22190f;           /* iron-gall ink */
-      --muted:      #6a5942;           /* faded ink */
+      --muted:      #61503a;           /* faded ink (AA on parchment) */
       --border:     #c9b487;           /* ruled line */
       --accent:     #8a1c1c;           /* oxblood — the rubric red */
       --accent-ink: #f6efdd;           /* text on oxblood */
@@ -87,13 +87,9 @@
 
     body {
       margin: 0;
+      /* Solid parchment — a background-image here defeats automated contrast
+         checks (axe can't evaluate text over a gradient), so keep it flat. */
       background-color: var(--bg);
-      /* faint parchment tooth — pure CSS, no image request */
-      background-image:
-        radial-gradient(rgba(34,25,15,.035) 1px, transparent 1px),
-        radial-gradient(rgba(34,25,15,.025) 1px, transparent 1px);
-      background-size: 3px 3px, 7px 7px;
-      background-position: 0 0, 2px 3px;
       color: var(--ink);
       font-family: var(--font-body);
       font-size: var(--text-base);
@@ -241,7 +237,7 @@
     .steps li::before {
       content: counter(step, upper-roman) ".";     /* I. II. III. — a codex numeral */
       font-family: var(--font-head); font-size: var(--step-1); font-weight: 600;
-      color: var(--gold); min-width: 2ch;
+      color: var(--accent); min-width: 2ch;         /* oxblood: meets AA as text */
     }
     .steps b { font-family: var(--font-head); font-weight: 600; }
 
@@ -260,7 +256,7 @@
     .prose ul li { position: relative; padding-left: calc(var(--u) * 3.5); margin-top: calc(var(--u) * 1.5); }
     .prose ul li::before {
       content: "◆"; position: absolute; left: 0; top: 0;
-      color: var(--gold); font-size: .8em; line-height: var(--line);
+      color: var(--accent); font-size: .8em; line-height: var(--line);
     }
 
     /* ---- Prompt / code box --------------------------------------------- */
