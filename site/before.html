@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Example page — redesign me</title>
+<!--
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  LECTURE 1 — REDESIGN THIS PAGE                                         │
+  │                                                                        │
+  │  This single file contains every kind of element the portal uses:      │
+  │  nav, hero, cards, steps, a lesson block, a prompt box, vote pills,     │
+  │  a form, and a footer. It is deliberately PLAIN.                        │
+  │                                                                        │
+  │  Your job: make it look good with AI — keep the content, improve the    │
+  │  design. Start by editing the design TOKENS just below (fonts,          │
+  │  colours, spacing), then refine. Justify every choice.                  │
+  └──────────────────────────────────────────────────────────────────────┘
+-->
+<style>
+  /* ===== DESIGN TOKENS — edit these first ============================== */
+  :root {
+    /* Typography */
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-head: var(--font-body);          /* try a display font for headings */
+    --text-base: 17px;
+    --line: 1.6;
+    /* Colour */
+    --bg: #ffffff;
+    --bg-soft: #f5f5f5;
+    --ink: #1a1a1a;
+    --muted: #5c5c5c;
+    --border: #e2e2e2;
+    --accent: #2563eb;                      /* one accent colour */
+    --accent-ink: #ffffff;                  /* text on the accent */
+    /* Shape & space */
+    --radius: 8px;
+    --space: 8px;                           /* base spacing unit */
+    --maxw: 920px;
+  }
+  /* ==================================================================== */
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: var(--text-base); line-height: var(--line);
+  }
+  h1, h2, h3 { font-family: var(--font-head); line-height: 1.2; }
+  a { color: var(--accent); }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 calc(var(--space) * 3); }
+  .muted { color: var(--muted); }
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+
+  /* Header / nav */
+  header { border-bottom: 1px solid var(--border); }
+  header .wrap { display: flex; align-items: center; gap: calc(var(--space) * 2); padding-top: calc(var(--space)*2); padding-bottom: calc(var(--space)*2); }
+  .brand { font-weight: 700; text-decoration: none; color: var(--ink); }
+  nav { margin-left: auto; display: flex; gap: calc(var(--space) * 2); }
+  nav a { color: var(--muted); text-decoration: none; }
+
+  /* Buttons */
+  .btn { display: inline-block; font: inherit; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+    border-radius: var(--radius); padding: calc(var(--space)*1.25) calc(var(--space)*2); text-decoration: none; }
+  .btn.secondary { background: transparent; color: var(--accent); }
+
+  section { padding: calc(var(--space) * 6) 0; border-bottom: 1px solid var(--border); }
+  .lede { font-size: 1.2rem; color: var(--muted); }
+
+  /* Cards */
+  .cards { list-style: none; padding: 0; margin: calc(var(--space)*3) 0 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: calc(var(--space)*2); }
+  .card { border: 1px solid var(--border); border-radius: var(--radius); padding: calc(var(--space)*2); }
+  .card b { display: block; }
+  .card p { margin: calc(var(--space)) 0 0; color: var(--muted); font-size: 0.95rem; }
+
+  /* Steps */
+  .steps { list-style: none; padding: 0; margin: calc(var(--space)*3) 0 0; display: grid; gap: var(--space); }
+  .steps li { border-left: 3px solid var(--accent); background: var(--bg-soft); padding: calc(var(--space)*1.5) calc(var(--space)*2); border-radius: 0 var(--radius) var(--radius) 0; }
+
+  /* Lesson prose + callout */
+  .prose p { max-width: 65ch; }
+  .callout { border-left: 4px solid var(--accent); background: var(--bg-soft); padding: calc(var(--space)*1.5) calc(var(--space)*2); border-radius: 0 var(--radius) var(--radius) 0; }
+
+  /* Prompt box */
+  .prompt { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: calc(var(--space)*2); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.9rem; white-space: pre-wrap; }
+
+  /* Vote pills */
+  .pills { display: flex; flex-wrap: wrap; gap: var(--space); margin-top: calc(var(--space)*2); }
+  .pill { border: 1px solid var(--border); background: var(--bg); border-radius: 999px; padding: calc(var(--space)*0.5) calc(var(--space)*1.5); }
+  .pill .n { color: var(--muted); font-size: 0.8em; }
+
+  /* Form */
+  form { display: grid; gap: var(--space); max-width: 520px; margin-top: calc(var(--space)*2); }
+  input, textarea { font: inherit; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: calc(var(--space)) calc(var(--space)*1.5); }
+
+  footer { color: var(--muted); font-size: 0.9rem; }
+  footer .wrap { padding-top: calc(var(--space)*3); padding-bottom: calc(var(--space)*3); }
+</style>
+</head>
+<body>
+  <!-- NAV -->
+  <header>
+    <div class="wrap">
+      <a class="brand" href="#">Upskill<span style="color:var(--accent)">.</span></a>
+      <nav>
+        <a href="#">Home</a>
+        <a href="#">Lessons</a>
+        <a href="#">Resources</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Example page</p>
+      <h1>Make this look good.</h1>
+      <p class="lede">This page is deliberately plain. Keep the words; improve the design — typography, colour, grid, hierarchy — and be able to justify every decision.</p>
+      <p>
+        <a class="btn" href="#">Primary action</a>
+        <a class="btn secondary" href="#">Secondary action</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- CARD GRID -->
+  <section>
+    <div class="wrap">
+      <h2>A grid of cards</h2>
+      <p class="muted">Cards are used for modules, resources, and lists across the portal.</p>
+      <ul class="cards">
+        <li class="card"><b>Typography</b><p>Type scale, pairing, weight, measure.</p></li>
+        <li class="card"><b>Colour</b><p>A small token palette with one accent.</p></li>
+        <li class="card"><b>Grid &amp; spacing</b><p>Alignment and breathing room on an 8px unit.</p></li>
+        <li class="card"><b>Hierarchy</b><p>What the eye hits first, second, third.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEPS -->
+  <section>
+    <div class="wrap">
+      <h2>A numbered list</h2>
+      <ol class="steps">
+        <li><b>Step one</b> — set your design tokens (fonts, colours, spacing).</li>
+        <li><b>Step two</b> — apply them across the page.</li>
+        <li><b>Step three</b> — refine hierarchy and polish.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- LESSON PROSE + CALLOUT -->
+  <section>
+    <div class="wrap prose">
+      <h2>A block of lesson text</h2>
+      <p>Lessons are mostly prose with the occasional callout, list, and prompt. Keep it readable — a comfortable measure (around 65 characters per line), clear headings, and enough space between sections.</p>
+      <div class="callout"><b>Callout.</b> A highlighted note that should stand out from the body without shouting.</div>
+      <ul>
+        <li>Bulleted points should be easy to scan.</li>
+        <li>Consistent spacing makes the page feel intentional.</li>
+        <li>Links should be obvious but not distracting.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PROMPT BOX -->
+  <section>
+    <div class="wrap">
+      <h2>A prompt / code box</h2>
+      <p class="muted">Monospace, easy to copy, clearly separated from prose.</p>
+      <div class="prompt">Read @CLAUDE.md for the tech rules and @content.md for the page content.
+
+Build me a clean landing page that uses my design system. Keep all the content. One HTML file.</div>
+    </div>
+  </section>
+
+  <!-- VOTE PILLS -->
+  <section>
+    <div class="wrap">
+      <h2>Vote pills</h2>
+      <p class="muted">Used on the Feedback &amp; Vote page — small, tappable, count alongside the label.</p>
+      <div class="pills">
+        <span class="pill">AI agents <span class="n">12</span></span>
+        <span class="pill">Kubernetes <span class="n">7</span></span>
+        <span class="pill">Terraform <span class="n">5</span></span>
+        <span class="pill">Vector databases <span class="n">3</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORM -->
+  <section>
+    <div class="wrap">
+      <h2>A form</h2>
+      <form onsubmit="return false">
+        <input type="text" placeholder="Short text input" aria-label="Short text input" />
+        <textarea rows="3" placeholder="A longer message…" aria-label="Message"></textarea>
+        <div><button class="btn" type="submit">Submit</button></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="wrap">Example page — redesign me. Upskill programme, Lecture 1.</div>
+  </footer>
+</body>
+</html>
