@@ -59,4 +59,5 @@ jobs:
             --standard WCAG2AA \
             --runner htmlcs \
             --runner axe \
+            --reporter json \
             site/index.html
