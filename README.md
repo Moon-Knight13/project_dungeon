@@ -2,6 +2,8 @@
 
 A language-agnostic, production-ready template for Claude-first development. Provides secure defaults, AI task routing, BMAD workflow integration, and deterministic CI gates so you can focus on your project rather than its scaffolding.
 
+_Derived from the upstream template [`claude_template_repo`](https://github.com/Moon-Knight13/claude_template_repo), kept in sync via the `template-sync` workflow._
+
 ## Live Project — Upskill Example-Page Redesign
 
 [![web-ci](https://github.com/Moon-Knight13/project_dungeon/actions/workflows/web-ci.yml/badge.svg)](https://github.com/Moon-Knight13/project_dungeon/actions/workflows/web-ci.yml)
@@ -17,6 +19,7 @@ Alongside the template scaffolding, this repo hosts a live web project: the **Up
 
 Planned and tracked on the GitHub Project board as an epic with one issue per task (see [docs/KANBAN_WORKFLOW.md](docs/KANBAN_WORKFLOW.md)):
 
+- **Original brief:** Upskill programme, Lecture 1 — _source link TBD_ <!-- TODO: replace with the Upskill lecture/course URL once available -->
 - **Epic:** [#11 — Redesign Upskill example page](https://github.com/Moon-Knight13/project_dungeon/issues/11)
 - **Stories:** [#12 redesigned `index.html`](https://github.com/Moon-Knight13/project_dungeon/issues/12) · [#13 `before.html` baseline](https://github.com/Moon-Knight13/project_dungeon/issues/13) · [#14 `netlify.toml` + security headers](https://github.com/Moon-Knight13/project_dungeon/issues/14) · [#15 `web-ci` gate](https://github.com/Moon-Knight13/project_dungeon/issues/15) · [#16 design rationale](https://github.com/Moon-Knight13/project_dungeon/issues/16) · [#17 `.templatesyncignore`](https://github.com/Moon-Knight13/project_dungeon/issues/17)
 - **Hosting → GitHub Pages:** [PR #34](https://github.com/Moon-Knight13/project_dungeon/pull/34)
