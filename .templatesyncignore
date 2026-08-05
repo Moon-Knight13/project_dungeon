@@ -22,4 +22,12 @@ LICENSE
 site/
 netlify.toml
 docs/upskill/
-.github/workflows/web-ci.yml
+
+# Workflow files: the actions-template-sync GitHub App token has no `workflows`
+# permission, so GitHub rejects any push that creates/updates .github/workflows/*
+# — which fails the ENTIRE sync push (see the template-sync run history). The
+# project intentionally stores no PAT secret, so own workflows downstream and
+# exclude the whole directory; the rest of the sync (docs, scripts) then succeeds.
+# Pull template workflow changes in manually when needed. Covers web-ci.yml and
+# the downstream-only pages.yml.
+.github/workflows/
