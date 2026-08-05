@@ -4,6 +4,9 @@ A language-agnostic, production-ready template for Claude-first development. Pro
 
 ## Live Project — Upskill Example-Page Redesign
 
+[![web-ci](https://github.com/Moon-Knight13/project_dungeon/actions/workflows/web-ci.yml/badge.svg)](https://github.com/Moon-Knight13/project_dungeon/actions/workflows/web-ci.yml)
+[![Pages deploy](https://github.com/Moon-Knight13/project_dungeon/actions/workflows/pages.yml/badge.svg)](https://github.com/Moon-Knight13/project_dungeon/actions/workflows/pages.yml)
+
 Alongside the template scaffolding, this repo hosts a live web project: the **Upskill programme's Lecture 1 example-page redesign**. The brief — take a deliberately-plain example page and improve it on the four design dials (**typography, colour, grid/spacing, hierarchy**) as a single self-contained `index.html` with a tasteful D&D theme, keeping every word of the original content verbatim.
 
 - 🌐 **Live page:** <https://moon-knight13.github.io/project_dungeon/> — deployed to GitHub Pages from [`site/index.html`](site/index.html)
@@ -19,6 +22,18 @@ Planned and tracked on the GitHub Project board as an epic with one issue per ta
 - **Hosting → GitHub Pages:** [PR #34](https://github.com/Moon-Knight13/project_dungeon/pull/34)
 
 > The live URL goes active once [PR #34](https://github.com/Moon-Knight13/project_dungeon/pull/34) merges to `main` and the GitHub Pages deploy runs.
+
+### How it's built
+
+- **One self-contained file** — [`site/index.html`](site/index.html) inlines all CSS and JS and makes **no external requests**: no CDNs, web fonts, analytics, or trackers. Every design decision traces back to the **design tokens** in the `:root` block at the top of the file, so the four dials are tunable in one place.
+- **The four dials, in code:**
+  - *Typography* — a fluid type scale (1.25 minor-third, `clamp()`-based) pairing an old-style serif for display with a system sans for body, held to a ~65-character measure.
+  - *Colour* — a small token palette (aged-vellum parchment, oxblood rubric, illuminated gold) with a full **light + dark** theme via `prefers-color-scheme`.
+  - *Grid & spacing* — an 8px base unit throughout and an `auto-fit` card grid that reflows without media queries.
+  - *Hierarchy* — rubricated small-caps eyebrows and a single gold hairline rule establish scan order; content is unchanged from the plain original.
+- **Accessibility (WCAG 2 AA)** — enforced in CI by the [`web-ci`](.github/workflows/web-ci.yml) gate (html-validate + pa11y running both htmlcs and axe). Includes a skip link, visible `:focus-visible` rings, semantic landmarks and real form labels, and `prefers-reduced-motion` support.
+- **Security** — a strict Content-Security-Policy (`default-src 'self'`, `object-src 'none'`, no external origins). On GitHub Pages it ships as a `<meta http-equiv>` tag; on Netlify it — plus `X-Content-Type-Options`, `Referrer-Policy`, and frame protection — comes from [`netlify.toml`](netlify.toml). See the hosting trade-offs in [`docs/upskill/RATIONALE.md`](docs/upskill/RATIONALE.md).
+- **Progressive enhancement** — the prompt-box copy button enhances a fully-readable page; with no JS or clipboard access, nothing breaks.
 
 ## What's Included
 
