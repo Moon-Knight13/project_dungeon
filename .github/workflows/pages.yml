@@ -6,8 +6,10 @@ name: pages
 # Pages artifact, so the repository root (.claude/, scripts/, CLAUDE.md, .env)
 # is never uploaded or served.
 #
-# One-time repo setup required: Settings → Pages → Build and deployment →
-# Source: "GitHub Actions". Without that, the deploy step has nothing to publish to.
+# configure-pages runs with `enablement: true`, so the first run turns on Pages
+# with "GitHub Actions" as the source automatically — no manual repo setting
+# needed. (Fallback if that ever fails: Settings → Pages → Build and deployment
+# → Source: "GitHub Actions".)
 
 on:
   push:
@@ -36,6 +38,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          # Enable Pages (source = GitHub Actions) on first run, so no manual
+          # repo setting is required. No-op once Pages is already enabled.
+          enablement: true
       - name: Upload site/ as the Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
