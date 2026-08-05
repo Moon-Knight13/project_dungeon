@@ -1,0 +1,19 @@
+# Trivy ignore file — read automatically by the container-scan workflow
+# (.github/workflows/container-scan.yml) via aquasecurity/trivy-action.
+#
+# CVE-2026-59873 — node-tar (`tar`) gzip-bomb Denial of Service.
+#   Location: the `tar` package bundled inside npm in the `node:24` base image
+#             (usr/local/lib/node_modules/npm/node_modules/tar), installed 7.5.15.
+#   Fixed upstream in tar 7.5.19, BUT the patched npm has not yet shipped in a
+#   published `node:24` image digest — Dependabot (#26) could not resolve a fixed
+#   digest as of 2026-08-05 (both `rebase` and `recreate` stayed on `392e1e2`).
+#
+#   Risk accepted (temporary): this is a build-time DoS in a dependency of npm,
+#   present only in the *devcontainer* image — not a shipped or production
+#   artifact — and the container runs behind a deny-by-default egress firewall.
+#   Exploiting it requires extracting an attacker-crafted tarball at image-build
+#   time, which is not part of the build.
+#
+#   REMOVE this line once a `node:24` digest ships npm with tar >= 7.5.19 (the
+#   Dependabot node digest bump will carry it); then let container-scan re-verify.
+CVE-2026-59873
