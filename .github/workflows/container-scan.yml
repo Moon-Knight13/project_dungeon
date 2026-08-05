@@ -4,10 +4,14 @@ on:
   pull_request:
     paths:
       - ".devcontainer/**"
+      - ".trivyignore"
+      - ".github/workflows/container-scan.yml"
   push:
     branches: [main]
     paths:
       - ".devcontainer/**"
+      - ".trivyignore"
+      - ".github/workflows/container-scan.yml"
   schedule:
     - cron: "0 8 * * 1"
   workflow_dispatch:
