@@ -2,6 +2,24 @@
 
 A language-agnostic, production-ready template for Claude-first development. Provides secure defaults, AI task routing, BMAD workflow integration, and deterministic CI gates so you can focus on your project rather than its scaffolding.
 
+## Live Project — Upskill Example-Page Redesign
+
+Alongside the template scaffolding, this repo hosts a live web project: the **Upskill programme's Lecture 1 example-page redesign**. The brief — take a deliberately-plain example page and improve it on the four design dials (**typography, colour, grid/spacing, hierarchy**) as a single self-contained `index.html` with a tasteful D&D theme, keeping every word of the original content verbatim.
+
+- 🌐 **Live page:** <https://moon-knight13.github.io/project_dungeon/> — deployed to GitHub Pages from [`site/index.html`](site/index.html)
+- 🔁 **Before → after:** the [plain baseline](https://moon-knight13.github.io/project_dungeon/before.html) ([`site/before.html`](site/before.html)) vs. the redesign above
+- 📐 **Design rationale:** [`docs/upskill/RATIONALE.md`](docs/upskill/RATIONALE.md) — the four dials plus a hosting comparison (Netlify / GitHub Pages / Cloudflare Pages)
+
+### Source & task tracking
+
+Planned and tracked on the GitHub Project board as an epic with one issue per task (see [docs/KANBAN_WORKFLOW.md](docs/KANBAN_WORKFLOW.md)):
+
+- **Epic:** [#11 — Redesign Upskill example page](https://github.com/Moon-Knight13/project_dungeon/issues/11)
+- **Stories:** [#12 redesigned `index.html`](https://github.com/Moon-Knight13/project_dungeon/issues/12) · [#13 `before.html` baseline](https://github.com/Moon-Knight13/project_dungeon/issues/13) · [#14 `netlify.toml` + security headers](https://github.com/Moon-Knight13/project_dungeon/issues/14) · [#15 `web-ci` gate](https://github.com/Moon-Knight13/project_dungeon/issues/15) · [#16 design rationale](https://github.com/Moon-Knight13/project_dungeon/issues/16) · [#17 `.templatesyncignore`](https://github.com/Moon-Knight13/project_dungeon/issues/17)
+- **Hosting → GitHub Pages:** [PR #34](https://github.com/Moon-Knight13/project_dungeon/pull/34)
+
+> The live URL goes active once [PR #34](https://github.com/Moon-Knight13/project_dungeon/pull/34) merges to `main` and the GitHub Pages deploy runs.
+
 ## What's Included
 
 - **AI routing** — routes low-risk work to a local Ollama model; escalates to Claude for security, architecture, and cross-cutting changes
