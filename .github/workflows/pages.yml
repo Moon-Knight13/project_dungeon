@@ -1,0 +1,51 @@
+name: pages
+
+# Deploy the static site (site/**) to GitHub Pages.
+#
+# Replaces Netlify Git auto-deploy. Publishes ONLY the site/ directory as the
+# Pages artifact, so the repository root (.claude/, scripts/, CLAUDE.md, .env)
+# is never uploaded or served.
+#
+# configure-pages runs with `enablement: true`, so the first run turns on Pages
+# with "GitHub Actions" as the source automatically — no manual repo setting
+# needed. (Fallback if that ever fails: Settings → Pages → Build and deployment
+# → Source: "GitHub Actions".)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-flight publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          # Enable Pages (source = GitHub Actions) on first run, so no manual
+          # repo setting is required. No-op once Pages is already enabled.
+          enablement: true
+      - name: Upload site/ as the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
