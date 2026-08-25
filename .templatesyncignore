@@ -23,11 +23,40 @@ site/
 netlify.toml
 docs/upskill/
 
-# Workflow files: the actions-template-sync GitHub App token has no `workflows`
-# permission, so GitHub rejects any push that creates/updates .github/workflows/*
-# — which fails the ENTIRE sync push (see the template-sync run history). The
-# project intentionally stores no PAT secret, so own workflows downstream and
-# exclude the whole directory; the rest of the sync (docs, scripts) then succeeds.
-# Pull template workflow changes in manually when needed. Covers web-ci.yml and
-# the downstream-only pages.yml.
-.github/workflows/
+# Workflow files are synced per file, not excluded wholesale.
+#
+# This directory used to be excluded entirely, on the premise that "the project
+# intentionally stores no PAT secret" and so could never push .github/workflows/*.
+# That premise is gone — TEMPLATE_SYNC_TOKEN is configured on this repo, and
+# template-sync now pushes workflow changes like any other file.
+#
+# The exclusion outlived its reason and became the problem it was hiding: with
+# every workflow excluded, template fixes never arrived here. This repo sat on
+# codeql-action 4.37.3 while the rest of the fleet moved to 4.37.8, pages.yml
+# drifted onto floating tags while every other repo SHA-pins, and the seven
+# stale Dependabot PRs cleared in Aug 2026 were all hand-patching what sync
+# should have delivered.
+#
+# What stays excluded below is only what genuinely differs downstream. Each entry
+# names why, so the next person can tell a real divergence from stale drift.
+
+# A different workflow that happens to share the template's filename. The
+# template publishes docs/explainer/; this publishes the site/ web app, with
+# `enablement: true` so first run turns Pages on. Not a drifted copy — do not sync.
+.github/workflows/pages.yml
+
+# Downstream-only: no counterpart in the template.
+.github/workflows/web-ci.yml
+
+# Deliberately stricter than the template. The template uses run_or_skip, so a
+# freshly stamped repo with no hook scripts does not go red before it has written
+# any CI. This repo HAS those scripts, so a missing one is a real failure and
+# run_or_fail is correct here. Syncing would silently weaken the gate.
+.github/workflows/ci.yml
+
+# Carries downstream path filters the template lacks — the scan also triggers on
+# .trivyignore and on the workflow itself. That is an improvement worth having
+# upstream; until it is ported to the template, syncing would delete it.
+# TODO: port the path filters to claude_template_repo, then drop this entry so
+# the upload-sarif pin stops lagging behind the fleet.
+.github/workflows/container-scan.yml
